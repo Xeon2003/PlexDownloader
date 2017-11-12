@@ -34,6 +34,7 @@ import uuid
 from ConfigParser import SafeConfigParser
 from time import gmtime, strftime
 from urllib2 import Request, quote, urlopen
+import urllib2
 from xml.dom import minidom
 
 from myplex import myplex_signin
@@ -100,6 +101,9 @@ scrapetimer = int(parser.get('scrape', 'timer'))
 plexsession = str(uuid.uuid4())
 socket.setdefaulttimeout(180)
 
+opener = urllib2.build_opener()
+opener.addheaders = [('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0')]
+
 plextoken = ""
 
 print "PlexScraper - " + VERSION
@@ -150,7 +154,7 @@ def tvShowScraper(searchtype):
         tvhttp=url+"/library/sections/"+tvshowid+"/"+searchtype+"?X-Plex-Token="+plextoken
     else:
         tvhttp=url+"/library/sections/"+tvshowid+"/"+searchtype
-    website = urllib.urlopen(tvhttp)
+    website = opener.open(tvhttp)
     xmldoc = minidom.parse(website)
     itemlist = xmldoc.getElementsByTagName('Directory')
     print str(len(itemlist)) + " Total TV Shows Found"
@@ -175,7 +179,7 @@ def movieScraper(searchtype):
         moviehttp=url+"/library/sections/"+movieid+"/"+searchtype+"?X-Plex-Token="+plextoken
     else:
         moviehttp=url+"/library/sections/"+movieid+"/"+searchtype
-    website = urllib.urlopen(moviehttp)
+    website = opener.open(moviehttp)
     xmldoc = minidom.parse(website)
     itemlist = xmldoc.getElementsByTagName('Video')
     print str(len(itemlist)) + " Total Movies Found"
@@ -207,7 +211,7 @@ def movieScraper(searchtype):
 #         pichttp=url+"/library/sections/"+pictureid+"/"+searchtype+"?X-Plex-Token="+plextoken
 #     else:
 #         pichttp=url+"/library/sections/"+pictureid+"/"+searchtype
-#     website = urllib.urlopen(pichttp)
+#     website = opener.open(pichttp)
 #     xmldoc = minidom.parse(website)
 #     itemlist = xmldoc.getElementsByTagName('Directory')
 #     print str(len(itemlist)) + " Total Albums Found"
@@ -228,7 +232,7 @@ def movieScraper(searchtype):
 #         musichttp=url+"/library/sections/"+musicid+"/"+searchtype+"?X-Plex-Token="+plextoken
 #     else:
 #         musichttp=url+"/library/sections/"+musicid+"/"+searchtype
-#     website = urllib.urlopen(musichttp)
+#     website = opener.open(musichttp)
 #     xmldoc = minidom.parse(website)
 #     #Get list of artists
 #     itemlist = xmldoc.getElementsByTagName('Directory')
