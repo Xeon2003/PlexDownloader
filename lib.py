@@ -33,6 +33,7 @@ import uuid
 from ConfigParser import SafeConfigParser
 from time import gmtime, strftime
 from urllib2 import Request, quote, urlopen
+import urllib2
 from xml.dom import minidom
 
 from myplex import myplex_signin
@@ -92,6 +93,9 @@ pictureactive = parser.get('pictures', 'active')
 plexsession=str(uuid.uuid4())
 socket.setdefaulttimeout(180)
 
+opener = urllib2.build_opener()
+opener.addheaders = [('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0')]
+
 plextoken=""
 def mvTranscoder(moviefull,container,link,moviemetadata):
 	container = "mp4"
@@ -111,7 +115,7 @@ def mvTranscoder(moviefull,container,link,moviemetadata):
 	else:
 		link = url+"/video/:/transcode/universal/start?path=http%3A%2F%2F127.0.0.1%3A32400%2Flibrary%2Fmetadata%2F"+moviemetadata+"&mediaIndex=0&partIndex=0&protocol=http&offset=0.000&fastSeek=1&directPlay=0&directStream=1&videoQuality="+moviequality+"&videoResolution="+moviewidth+"x"+movieheight+"&maxVideoBitrate="+moviebitrate+"&subtitleSize=100&audioBoost=100&session="+plexsession+"&X-Plex-Client-Identifier="+clientid+"&X-Plex-Product=Plex+Web&X-Plex-Device=OSX&X-Plex-Platform=Chrome&X-Plex-Platform-Version=36.0&X-Plex-Version=2.2.3&X-Plex-Device-Name=Plex+Web+(Chrome)"
 		print "Transcode URL: "+link
-	mvfile=urllib.URLopener()
+	mvfile=opener.opener()
 	moviefull = re.sub(r'[\\/:"*?<>|"]+',"",moviefull)
 	if not os.path.exists(movielocation+moviefull):
 		os.makedirs(movielocation+moviefull)
@@ -146,7 +150,7 @@ def tvTranscoder(show,season,episode,container,link,eptitle,tvmetadata):
 	else:
 		link = url+"/video/:/transcode/universal/start?path=http%3A%2F%2F127.0.0.1%3A32400%2Flibrary%2Fmetadata%2F"+tvmetadata+"&mediaIndex=0&partIndex=0&protocol=http&offset=0&fastSeek=1&directPlay=0&directStream=1&videoQuality="+tvquality+"&videoResolution="+tvwidth+"x"+tvheight+"&maxVideoBitrate="+tvbitrate+"&subtitleSize=100&audioBoost=100&session="+plexsession+"&X-Plex-Client-Identifier="+clientid+"&X-Plex-Product=Plex+Web&X-Plex-Device=OSX&X-Plex-Platform=Chrome&X-Plex-Platform-Version=36.0&X-Plex-Version=2.2.3&X-Plex-Device-Name=Plex+Web+(Chrome)"
 		print "Transcode URL: "+link
-	epfile=urllib.URLopener()
+	epfile=opener.opener()
 	show = re.sub(r'[\\/:"*?<>|"]+',"",show)
 	eptitle = re.sub(r'[\\/:"*?<>|"]+',"",eptitle)
 	if not os.path.exists(tvlocation+show):
@@ -164,7 +168,7 @@ def tvTranscoder(show,season,episode,container,link,eptitle,tvmetadata):
 		print "File already exists. Skipping episode transcode."
 
 def epDownloader(show,season,episode,container,link,eptitle):
-	epfile=urllib.URLopener()
+	epfile=opener.opener()
 	show = re.sub(r'[\\/:"*?<>|"]+',"",show)
 	eptitle = re.sub(r'[\\/:"*?<>|"]+',"",eptitle)
 	if not os.path.exists(tvlocation+show):
@@ -182,7 +186,7 @@ def epDownloader(show,season,episode,container,link,eptitle):
 		print "File already exists. Skipping episode."
 
 def mvDownloader(moviefull,container,link):
-	mvfile=urllib.URLopener()
+	mvfile=opener.opener()
 	moviefull = re.sub(r'[\\/:"*?<>|"]+',"",moviefull)
 	if not os.path.exists(movielocation+moviefull):
 		os.makedirs(movielocation+moviefull)
@@ -199,7 +203,7 @@ def mvDownloader(moviefull,container,link):
 		print "File already exists. Skipping movie."
 
 def photoDownloader(albumname,picturename,link,container):
-	photofile=urllib.URLopener()
+	photofile=opener.opener()
 	albumname = re.sub(r'[\\/:"*?<>|"]+',"",albumname)
 	picturename = re.sub(r'[\\/:"*?<>|"]+',"",picturename)
 
@@ -219,7 +223,7 @@ def photoDownloader(albumname,picturename,link,container):
 
 
 def songDownloader(artist,cd,song,link,container):
-	musicfile=urllib.URLopener()
+	musicfile=opener.opener()
 	artist = re.sub(r'[\\/:"*?<>|"]+',"",artist)
 	cd = re.sub(r'[\\/:"*?<>|"]+',"",cd)
 	song = re.sub(r'[\\/:"*?<>|"]+',"",song)
@@ -251,7 +255,7 @@ def tvShowSearch():
 	else:
 		tvhttp=url+"/library/sections/"+tvshowid+"/all"
 
-	website = urllib.urlopen(tvhttp)
+	website = opener.open(tvhttp)
 	xmldoc = minidom.parse(website)
 	itemlist = xmldoc.getElementsByTagName('Directory')
 	print str(len(itemlist)) + " Total TV Shows Found"
@@ -266,7 +270,7 @@ def tvShowSearch():
 				seasonhttp=url+tvkey+"?X-Plex-Token="+plextoken
 			else:
 				seasonhttp=url+tvkey
-			seasonweb = urllib.urlopen(seasonhttp)
+			seasonweb = opener.open(seasonhttp)
 			xmlseason = minidom.parse(seasonweb)
 			seasonlist = xmlseason.getElementsByTagName('Directory')
 			totalseasons =  len(seasonlist)
@@ -282,7 +286,7 @@ def tvShowSearch():
 							episodehttp=url+seasonkey+"?X-Plex-Token="+plextoken
 						else:
 							episodehttp=url+seasonkey
-						episodeweb=urllib.urlopen(episodehttp)
+						episodeweb=opener.open(episodehttp)
 						xmlepisode=minidom.parse(episodeweb)
 						episodelist=xmlepisode.getElementsByTagName('Video')
 						for episode in episodelist:
@@ -324,7 +328,7 @@ def tvShowSearch():
 							episodehttp=url+seasonkey+"?X-Plex-Token="+plextoken
 						else:
 							episodehttp=url+seasonkey
-						episodeweb=urllib.urlopen(episodehttp)
+						episodeweb=opener.open(episodehttp)
 						xmlepisode=minidom.parse(episodeweb)
 						episodelist=xmlepisode.getElementsByTagName('Video')
 						totalepisodes= len(episodelist)
@@ -382,7 +386,7 @@ def tvShowSearch():
 								episodehttp=url+seasonkey+"?X-Plex-Token="+plextoken
 							else:
 								episodehttp=url+seasonkey
-							episodeweb=urllib.urlopen(episodehttp)
+							episodeweb=opener.open(episodehttp)
 							xmlepisode=minidom.parse(episodeweb)
 							episodelist=xmlepisode.getElementsByTagName('Video')
 							for episode in episodelist:
@@ -436,7 +440,7 @@ def movieSearch():
 		moviehttp=url+"/library/sections/"+movieid+"/all"+"?X-Plex-Token="+plextoken
 	else:
 		moviehttp=url+"/library/sections/"+movieid+"/all"
-	website = urllib.urlopen(moviehttp)
+	website = opener.open(moviehttp)
 	xmldoc = minidom.parse(website)
 	itemlist = xmldoc.getElementsByTagName('Video')
 	print str(len(itemlist)) + " Total Movies Found"
@@ -496,7 +500,7 @@ def photoSearch():
 		pichttp=url+"/library/sections/"+pictureid+"/all"+"?X-Plex-Token="+plextoken
 	else:
 		pichttp=url+"/library/sections/"+pictureid+"/all"
-	website = urllib.urlopen(pichttp)
+	website = opener.open(pichttp)
 	xmldoc = minidom.parse(website)
 	itemlist = xmldoc.getElementsByTagName('Directory')
 	print str(len(itemlist)) + " Total Albums Found"
@@ -511,7 +515,7 @@ def photoSearch():
 				albumhttp=url+albumkey+"?X-Plex-Token="+plextoken
 			else:
 				albumhttp=url+albumkey
-			albumweb=urllib.urlopen(albumhttp)
+			albumweb=opener.open(albumhttp)
 			xmlalbum=minidom.parse(albumweb)
 			picturesinalbum=xmlalbum.getElementsByTagName('Photo')
 			for pics in picturesinalbum:
@@ -544,7 +548,7 @@ def musicSearch():
 		musichttp=url+"/library/sections/"+musicid+"/all"+"?X-Plex-Token="+plextoken
 	else:
 		musichttp=url+"/library/sections/"+musicid+"/all"
-	website = urllib.urlopen(musichttp)
+	website = opener.open(musichttp)
 	xmldoc = minidom.parse(website)
 	#Get list of artists
 	itemlist = xmldoc.getElementsByTagName('Directory')
@@ -559,7 +563,7 @@ def musicSearch():
 				cdhttp=url+musickey+"?X-Plex-Token="+plextoken
 			else:
 				cdhttp=url+musickey
-			cdweb=urllib.urlopen(cdhttp)
+			cdweb=opener.open(cdhttp)
 			xmlcd=minidom.parse(cdweb)
 			#get List of CDs
 			cdlist=xmlcd.getElementsByTagName('Directory')
@@ -571,7 +575,7 @@ def musicSearch():
 						songhttp=url+cdkey+"?X-Plex-Token="+plextoken
 					else:
 						songhttp=url+cdkey
-					songweb=urllib.urlopen(songhttp)
+					songweb=opener.open(songhttp)
 					xmlsong=minidom.parse(songweb)
 					#Get List of Songs
 					songlist=xmlsong.getElementsByTagName('Track')

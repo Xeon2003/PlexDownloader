@@ -13,6 +13,7 @@ from lib import movieSearch, musicSearch, photoSearch, tvShowSearch
 from time import gmtime, strftime
 from urllib2 import Request, quote, urlopen
 from xml.dom import minidom
+import urllib2
 
 import web
 from myplex import myplex_signin
@@ -71,6 +72,8 @@ urls = (
     '/force', 'force'
 )
 
+opener = urllib2.build_opener()
+opener.addheaders = [('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0')]
 
 movielib = []
 moviewanted = []
@@ -86,7 +89,11 @@ def movieSearchWeb():
         moviehttp = url+"/library/sections/"+movieid+"/all"+"?X-Plex-Token="+plextoken
     else:
         moviehttp = url+"/library/sections/"+movieid+"/all"
-    website = urllib.urlopen(moviehttp)
+    
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0')]
+
+    website = opener.open(moviehttp)
     xmldoc = minidom.parse(website)
     movielibrary = xmldoc.getElementsByTagName('Video')
 
@@ -116,7 +123,7 @@ def musicSearchWeb():
         musichttp = url+"/library/sections/"+musicid+"/all"+"?X-Plex-Token="+plextoken
     else:
         musichttp = url+"/library/sections/"+musicid+"/all"
-    website = urllib.urlopen(musichttp)
+    website = opener.open(musichttp)
     xmldoc = minidom.parse(website)
     #Get list of artists
     itemlist = xmldoc.getElementsByTagName('Directory')
@@ -143,7 +150,7 @@ def photoSearchWeb():
         pichttp = url+"/library/sections/"+pictureid+"/all"+"?X-Plex-Token="+plextoken
     else:
         pichttp = url+"/library/sections/"+pictureid+"/all"
-    website = urllib.urlopen(pichttp)
+    website = opener.open(pichttp)
     xmldoc = minidom.parse(website)
     itemlist = xmldoc.getElementsByTagName('Directory')
     for item in itemlist:
@@ -169,8 +176,9 @@ def tvShowSearchWeb():
     else:
         tvhttp = url+"/library/sections/"+tvshowid+"/all"
 
-    website = urllib.urlopen(tvhttp)
+    website = opener.open(tvhttp)
     xmldoc = minidom.parse(website)
+
     itemlist = xmldoc.getElementsByTagName('Directory')
     for item in itemlist:
         tvtitle = item.attributes['title'].value
