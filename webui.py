@@ -89,9 +89,6 @@ def movieSearchWeb():
         moviehttp = url+"/library/sections/"+movieid+"/all"+"?X-Plex-Token="+plextoken
     else:
         moviehttp = url+"/library/sections/"+movieid+"/all"
-    
-    opener = urllib2.build_opener()
-    opener.addheaders = [('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0')]
 
     website = opener.open(moviehttp)
     xmldoc = minidom.parse(website)
